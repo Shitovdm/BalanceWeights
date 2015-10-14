@@ -1,0 +1,124 @@
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.io.FileNotFoundException;
+/**
+ *  	2.Баланс весов.
+ * Дана конечная последовательность натуральных чисел.
+ * Считая их массами имеющихся в наличии предметов, определить, можно ли все эти предметы положить на весы так, чтобы весы находились в равновесии. Вывести вариант расположения.
+ * Определить, можно ли из них отобрать какое-то количество предметов с суммарным весом 100 (вывести yes или no, в зависимости от результата).
+ *
+ * @author Шитов Дмитрий
+ * @version 1.0
+ */
+public class BalanceWeights {
+	
+	/**
+	 * Функция перебора всех возможных перестановок и поиска возможного варианта расположения элементов массива.
+	 * Так же,встроен счетчик отбора элементов с суммарным весом 100.
+	 * Алгоритм перебора всех возможных перестановок, основан на использовании битовой маски. Перебор вариантов осуществлен постепенным сдвигом битов.
+	 * @param array Заданная конечная числовая последовательность.
+	 * @return Возможный вариант расположения элементов.
+	 */
+	private static String BustPermutation(int mask, Integer[] array) {
+		int LeftSum = 0;
+		int RightSum = 0;
+		String All = null;
+		ArrayList<Integer> LeftArray = new ArrayList<>();
+		ArrayList<Integer> RightArray = new ArrayList<>();
+		for (int i = 0; i < array.length; i++) {
+			/** Если бит номер i единичный, добавляем i-й элемент массива к LeftArray (левая чаша весов) и суммируем все элементы, проходящии проверку(для подсчета общей суммы); */
+			if ((mask & (1 << i)) != 0 ) {
+				LeftSum = LeftSum + array[i];
+				LeftArray.add(array[i]);
+			}
+			/** Собираем все оставшиеся элементы (имитируем правую чашу весов). */
+			if ((mask & (1 << i)) == 0 ) {
+				RightSum = RightSum + array[i];
+				RightArray.add(array[i]);
+			}	
+		}
+		/** Проверка, является ли сумма элементов левой чаши равной сумме элементов правой чаши.
+		 * Если является, формируем строку из удачного расположения элементах на весах с помощью функции @{LinkListToString}. 
+		 * */
+		if(RightSum == LeftSum){
+			String Left = ListToStr(LeftArray);
+			String Right = ListToStr(RightArray);
+			All = Left + " - " + Right;
+		}
+		/** Счетчик, отбора элементов с суммарным весом 100. */
+		if(LeftSum == 100){
+			flag100 = true;
+		}
+		LeftSum = 0;
+		RightSum = 0;
+		LeftArray.clear();
+		RightArray.clear();
+		return All;
+	}
+	
+	/**
+	 * Создает строку, состоящую из элементов массива ArrayList;
+	 * @param ArrayList;
+	 * @return Возвращает созданную строку;
+	 */
+	public static String ListToStr(ArrayList<Integer> ArrayList) {
+		String s = new String();
+        for (Integer e : ArrayList) {
+            s = s + " " + e;
+        }
+        return s;
+	}
+	
+	private static boolean flag100 = false;
+	@SuppressWarnings({ "resource" })
+	public static void main(String[] args) throws FileNotFoundException {
+		Scanner Scan = new Scanner(new File("inputFile")); 
+        ArrayList<Integer> ArrayList = new ArrayList<>();
+        int inputInteger;
+        if (!Scan.hasNextInt()) {
+            throw new IllegalArgumentException("Ошибка!Некорректный ввод!");
+        }
+        while (Scan.hasNext()) {
+            if (!Scan.hasNextInt()) {
+                throw new IllegalArgumentException("Ошибка!Некорректный ввод!");
+            }
+            else {
+                inputInteger = Scan.nextInt();
+                if (inputInteger < 1) {
+                    throw new IllegalArgumentException("Ошибка!Вводите только натуральные числа!");
+                }
+                else {
+                	ArrayList.add(inputInteger);
+                }
+            }
+        }
+		Integer[] array = new Integer[ArrayList.size()];
+		ArrayList.toArray(array);
+		int mask = 0;
+		int limit = 1 << array.length;
+		String Result = null;
+		while (mask < limit) {
+			Result = BustPermutation(mask, array);
+			mask++;
+			if(Result != null){
+				break;
+			}
+		}
+		if(Result == null){
+			System.out.println("Весы не могут быть уравновешены!");
+		}
+		else {
+			System.out.println(Result);
+		}
+		if(flag100){
+			System.out.println(" Yes");
+		}
+		else{
+			System.out.println(" No");
+		}
+	}
+	
+	
+}
